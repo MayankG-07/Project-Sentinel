@@ -16,6 +16,8 @@ Project Sentinel is a 100% offline, air-gapped RAG (Retrieval-Augmented Generati
 ## Key Features in Detail
 
 ### Core Functionality
+- **Intelligent Routing:** The system uses the LLM itself to analyze the user's query and intelligently decide which data source to use.
+- **Page-Specific Retrieval:** Users can ask for a specific page of a document (e.g., "show me page 6 of bot.pdf"), and the system will retrieve and display the content of that exact page.
 - **Dual-Engine RAG:** Seamlessly retrieves information from both **unstructured data** (PDF documents) and **structured data** (a local or cloud SQL database).
 - **100% Air-Gapped & Private:** All components run entirely on your local machine or on-premise server. Zero data leakage is guaranteed.
 - **Hybrid Database Capability:** The application is hybrid-ready. It can connect to either a local SQLite database file (for on-premise deployments) or a full database connection string (for cloud databases like Google Cloud SQL or AWS RDS).

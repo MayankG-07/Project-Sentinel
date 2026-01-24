@@ -22,10 +22,11 @@ const Source = ({ source }) => {
 };
 
 function App() {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  // Use a relative path if VITE_API_URL is not set. This is the key for Docker.
+  const API_URL = import.meta.env.VITE_API_URL || '';
 
   const [apiKey, setApiKey] = useState('');
-  const [user, setUser] = useState(null); // New state to hold user info
+  const [user, setUser] = useState(null);
   const [messages, setMessages] = useState([
     {
       role: 'ai',
@@ -51,9 +52,8 @@ function App() {
     }
     setLoading(true);
     try {
-      const res = await axios.post(
+      const res = await axios.get( // Changed to GET
         `${API_URL}/auth/verify`,
-        {},
         { headers: { 'X-API-Key': trimmedApiKey } }
       );
       setUser(res.data);
@@ -89,7 +89,7 @@ function App() {
       const aiMsg = { role: 'ai', text: response, sources: sources || [] };
       setMessages(prev => [...prev, aiMsg]);
     } catch (error) {
-      let text = `⚠️ NETWORK ERROR: Verify server is running on ${API_URL}.`;
+      let text = `⚠️ NETWORK ERROR: Verify server is running.`;
       if (error.response) {
         if (error.response.status === 403) {
           text = "🚫 AUTHORIZATION FAILURE: You do not have permission for this query.";
