@@ -6,11 +6,19 @@ from passlib.context import CryptContext
 # --- CONFIGURATION ---
 # In a real application, this would come from a secure database.
 # For now, we define it here. The keys are hashed for security.
-# Plaintext keys: "admin_key"
+# Plaintext keys: "admin_key", "finance_key", "legal_key"
 FAKE_USERS_DB = {
     "admin": {
         "hashed_key": "$2b$12$HDgiFJQiPQ86AcphdnVVq.y9xwMsGGWcuLbddUO8X0gUlZkspC/tC", # admin_key
         "roles": ["admin", "finance", "legal"],
+    },
+    "alice": {
+        "hashed_key": "$2b$12$k7pTMFCC0tizMDa52rYwfuefnaqRTi5MG.8WgrArjeC38SecOlD5e", # finance_key
+        "roles": ["finance"],
+    },
+    "bob": {
+        "hashed_key": "$2b$12$mZnvlSzEdQ1a7kUqQHoedeGceYyFFZqgqNLuK7iTces1ckq55g/oS", # legal_key
+        "roles": ["legal"],
     }
 }
 
