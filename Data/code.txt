@@ -1,0 +1,109 @@
+import { useState, useRef, useEffect } from 'react'
+import axios from 'axios'
+import './App.css'
+
+function App() {
+  // STRICT LOCAL MODE
+  const API_URL = 'http://localhost:8000';
+
+  const [messages, setMessages] = useState([
+    { 
+      role: 'ai', 
+      text: "/// SENTINEL OS v1.0 ONLINE ///\n\nSystem Status: AIR-GAPPED\nConnection: LOCALHOST ONLY\n\nSecure Enclave Established. Awaiting command..." 
+    }
+  ])
+  const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(false)
+  const chatEndRef = useRef(null)
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+  useEffect(scrollToBottom, [messages])
+
+  const handleSearch = async () => {
+    if (!query.trim()) return
+
+    const userMsg = { role: 'user', text: query }
+    setMessages(prev => [...prev, userMsg])
+    setQuery('')
+    setLoading(true)
+
+    try {
+      const res = await axios.post(`${API_URL}/chat`, { text: userMsg.text })
+      const aiMsg = { role: 'ai', text: res.data.response }
+      setMessages(prev => [...prev, aiMsg])
+    } catch (error) {
+      const errorMsg = { 
+        role: 'ai', 
+        text: "⚠️ NETWORK ERROR: Verify server.py is running on Localhost:8000." 
+      }
+      setMessages(prev => [...prev, errorMsg])
+    }
+    setLoading(false)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSearch()
+    }
+  }
+
+  return (
+    <>
+      {/* HEADER */}
+      <header className="header">
+        <div className="brand">
+          <span>🛡️</span> 
+          PROJECT SENTINEL
+        </div>
+        <div className="status-badge">
+          <span className="status-dot"></span>
+          AIR-GAPPED
+        </div>
+      </header>
+
+      {/* TERMINAL OUTPUT */}
+      <div className="chat-container">
+        {messages.map((msg, index) => (
+          <div key={index} className={`message ${msg.role}`}>
+            <span className="sender-name">
+              {msg.role === 'user' ? '>> OPERATOR_01' : '>> SENTINEL_CORE'}
+            </span>
+            <div className="msg-bubble">
+              {msg.text}
+            </div>
+          </div>
+        ))}
+        
+        {loading && (
+          <div className="message ai">
+            <span className="sender-name">>> SENTINEL_CORE</span>
+            <div className="msg-bubble" style={{ color: '#94a3b8' }}>
+              Processing secure query...
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* INPUT CONSOLE */}
+      <div className="input-area">
+        <div className="input-wrapper">
+          <textarea 
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Enter command (Local Only)..."
+          />
+          <button onClick={handleSearch} disabled={loading}>
+            {loading ? 'BUSY' : 'EXECUTE'}
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default App

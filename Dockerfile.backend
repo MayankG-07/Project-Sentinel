@@ -1,0 +1,25 @@
+# Stage 1: Base image with Python
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install system dependencies that might be needed for Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
+
+# Copy the requirements file and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download and install the spaCy model for Presidio
+RUN python -m spacy download en_core_web_lg
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port the server will run on
+EXPOSE 8000
+
+# The command to run the application
+# Note: The database needs to be ingested first by running ingest.py
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]

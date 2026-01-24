@@ -1,0 +1,47 @@
+# =========================================
+#  Project Sentinel .gitignore
+# =========================================
+
+# --- Secrets ---
+# Ignore the local environment file.
+# The .env.example file SHOULD be committed.
+.env
+
+# --- Python ---
+# Ignore the virtual environment.
+.venv/
+# Ignore Python bytecode and cache.
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Databases & Generated Data ---
+# Ignore the ChromaDB vector database.
+chroma_db/
+# Ignore the directory for the local SQLite database.
+db_data/
+# Ignore the audit log file.
+audit.log
+
+# --- Node.js / Frontend ---
+# Ignore frontend dependencies.
+client/node_modules/
+# Ignore the frontend production build output.
+client/dist/
+# Ignore frontend log files.
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+
+# --- IDE & Editor ---
+# Ignore JetBrains / PyCharm / WebStorm files.
+.idea/
+# Ignore VSCode files.
+.vscode/
+
+# --- OS Files ---
+# Ignore macOS files.
+.DS_Store
+# Ignore Windows thumbnail cache.
+Thumbs.db

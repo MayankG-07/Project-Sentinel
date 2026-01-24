@@ -1,0 +1,10 @@
+# Default ignored files
+/../../../:ProjectSentinel/.idea/shelf/
+/../../../:ProjectSentinel/.idea/workspace.xml
+# Ignored default folder with query files
+/../../../:ProjectSentinel/.idea/queries/
+# Datasource local storage ignored files
+/../../../:ProjectSentinel/.idea/dataSources/
+/../../../:ProjectSentinel/.idea/dataSources.local.xml
+# Editor-based HTTP Client requests
+/../../../:ProjectSentinel/.idea/httpRequests/

@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "hashed_key": "$2b$12$E.o6.aK3GkS/TKVb.T9SVeo.1s.PLJ/9f.LOMOUWJvY/j.S.Qc/zS",
+    "roles": ["admin", "finance", "legal"]
+  },
+  "alice": {
+    "hashed_key": "$2b$12$W.1E.V.Z.o9.j.K.l.m.N.o.p.Q.r.S.t.U.v.W.x.Y.z.A.B.C.D",
+    "roles": ["finance"]
+  },
+  "bob": {
+    "hashed_key": "$2b$12$a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.q.r.s.t.u.v.w.x.y.z",
+    "roles": ["legal"]
+  }
+}

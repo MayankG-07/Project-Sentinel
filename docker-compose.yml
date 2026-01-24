@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: sentinel-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./db_data:/app/db_data # Mount the directory for the SQLite DB
+      - ./Data:/app/Data
+    env_file:
+      - .env
+    # This command is for running the server.
+    # To ingest data, you would run:
+    # docker-compose run --rm backend python ingest.py
+    command: uvicorn server:app --host 0.0.0.0 --port 8000
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.frontend
+      args:
+        # Use the value from the .env file at build time
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: sentinel-frontend
+    ports:
+      - "8080:80" # Expose Nginx on port 8080
+    depends_on:
+      - backend
+
+networks:
+  default:
+    name: sentinel-network

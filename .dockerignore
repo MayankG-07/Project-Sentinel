@@ -1,0 +1,26 @@
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile.backend
+Dockerfile.frontend
+docker-compose.yml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Node
+client/node_modules/
+
+# IDE
+.idea/
+
+# Data & DBs - These are mounted as volumes, not copied
+chroma_db/
+company.db
+Data/
