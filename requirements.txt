@@ -20,3 +20,6 @@ langchain-huggingface
 langchain-chroma
 langchain-text-splitters
 langchain-core
+PyMuPDF
+psycopg2-binary
+pymysql

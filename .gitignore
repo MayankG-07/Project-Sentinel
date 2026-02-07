@@ -3,45 +3,42 @@
 # =========================================
 
 # --- Secrets ---
-# Ignore the local environment file.
-# The .env.example file SHOULD be committed.
 .env
 
 # --- Python ---
-# Ignore the virtual environment.
+venv/
 .venv/
-# Ignore Python bytecode and cache.
+env/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache/
+.coverage
+htmlcov/
 
 # --- Databases & Generated Data ---
-# Ignore the ChromaDB vector database.
 chroma_db/
-# Ignore the directory for the local SQLite database.
 db_data/
-# Ignore the audit log file.
 audit.log
+*.log
+# Ignore rendered PDF images
+client/public/rendered_pages/
 
 # --- Node.js / Frontend ---
-# Ignore frontend dependencies.
 client/node_modules/
-# Ignore the frontend production build output.
 client/dist/
-# Ignore frontend log files.
+client/.eslintcache
 client/npm-debug.log*
 client/yarn-debug.log*
 client/yarn-error.log*
 
 # --- IDE & Editor ---
-# Ignore JetBrains / PyCharm / WebStorm files.
 .idea/
-# Ignore VSCode files.
 .vscode/
+*.swp
+*.swo
 
 # --- OS Files ---
-# Ignore macOS files.
 .DS_Store
-# Ignore Windows thumbnail cache.
 Thumbs.db

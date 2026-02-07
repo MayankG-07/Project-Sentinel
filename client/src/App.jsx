@@ -1,201 +1,358 @@
-import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import './App.css';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    Container,
+    TextField,
+    Button,
+    Box,
+    Typography,
+    AppBar,
+    Toolbar,
+    Paper,
+    CircularProgress,
+    CssBaseline,
+    ThemeProvider,
+    createTheme,
+    Grid,
+    IconButton,
+    InputAdornment,
+    Tooltip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+} from '@mui/material';
+import {
+    Send as SendIcon,
+    ContentCopy as ContentCopyIcon,
+    Shield as ShieldIcon,
+    Visibility,
+    VisibilityOff,
+    Close as CloseIcon,
+    Print as PrintIcon,
+    CloudUpload as CloudUploadIcon,
+} from '@mui/icons-material';
+import Markdown from 'react-markdown';
 
-const Source = ({ source }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const fileName = source.source.split(/[\\/]/).pop(); // Extract filename
+// --- THEME ---
+export const theme = createTheme({
+    palette: {
+        mode: 'dark',
+        primary: { main: '#00A8E8' },
+        background: { default: '#121212', paper: '#1E1E1E' },
+    },
+    typography: {
+        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+        h4: { fontWeight: 700 },
+    },
+});
 
-  return (
-    <div className="source">
-      <div className="source-header" onClick={() => setIsExpanded(!isExpanded)}>
-        <span>📄 {fileName}</span>
-        <span>{isExpanded ? '▲' : '▼'}</span>
-      </div>
-      {isExpanded && (
-        <div className="source-content">
-          <p>{source.content}</p>
-        </div>
-      )}
-    </div>
-  );
+// --- API ---
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const apiClient = {
+    verify: (apiKey) => fetch(`${API_URL}/auth/verify`, { headers: { 'X-API-Key': apiKey } }),
+    chat: (apiKey, text) => fetch(`${API_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        body: JSON.stringify({ text }),
+    }),
+    upload: (apiKey, file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return fetch(`${API_URL}/upload`, {
+            method: 'POST',
+            headers: { 'X-API-Key': apiKey },
+            body: formData,
+        });
+    },
 };
 
-function App() {
-  // Use a relative path if VITE_API_URL is not set. This is the key for Docker.
-  const API_URL = import.meta.env.VITE_API_URL || '';
-
-  const [apiKey, setApiKey] = useState('');
-  const [user, setUser] = useState(null);
-  const [messages, setMessages] = useState([
-    {
-      role: 'ai',
-      text: "/// SENTINEL OS v1.0 ONLINE ///\n\nSystem Status: SECURE CONNECTION REQUIRED\n\nPlease enter your API Key and press CONNECT.",
-      sources: [],
-    }
-  ]);
-  const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const chatEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-  useEffect(scrollToBottom, [messages]);
-
-  const handleConnect = async () => {
-    const trimmedApiKey = apiKey.trim();
-    if (!trimmedApiKey) {
-      const errorMsg = { role: 'ai', text: "⚠️ AUTHENTICATION FAILURE: API Key is required.", sources: [] };
-      setMessages(prev => [...prev, errorMsg]);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await axios.get( // Changed to GET
-        `${API_URL}/auth/verify`,
-        { headers: { 'X-API-Key': trimmedApiKey } }
-      );
-      setUser(res.data);
-      const welcomeMsg = { role: 'ai', text: `Welcome, ${res.data.username}. Secure enclave established. You may now enter your commands.`, sources: [] };
-      setMessages(prev => [...prev, welcomeMsg]);
-    } catch (error) {
-      let text = "⚠️ AUTHENTICATION FAILURE: The provided API Key is invalid.";
-      if (error.response && error.response.status !== 401) {
-        text = `⚠️ ERROR ${error.response.status}: ${error.response.data.detail || 'An unknown error occurred.'}`;
-      }
-      const errorMsg = { role: 'ai', text, sources: [] };
-      setMessages(prev => [...prev, errorMsg]);
-    }
-    setLoading(false);
-  };
-
-  const handleSearch = async () => {
-    const trimmedApiKey = apiKey.trim();
-    if (!query.trim() || !user) return;
-
-    const userMsg = { role: 'user', text: query, sources: [] };
-    setMessages(prev => [...prev, userMsg]);
-    setQuery('');
-    setLoading(true);
-
-    try {
-      const res = await axios.post(
-        `${API_URL}/chat`,
-        { text: userMsg.text },
-        { headers: { 'X-API-Key': trimmedApiKey } }
-      );
-      const { response, sources } = res.data;
-      const aiMsg = { role: 'ai', text: response, sources: sources || [] };
-      setMessages(prev => [...prev, aiMsg]);
-    } catch (error) {
-      let text = `⚠️ NETWORK ERROR: Verify server is running.`;
-      if (error.response) {
-        if (error.response.status === 403) {
-          text = "🚫 AUTHORIZATION FAILURE: You do not have permission for this query.";
-        } else {
-          text = `⚠️ ERROR ${error.response.status}: ${error.response.data.detail || 'An unknown error occurred.'}`;
-        }
-      }
-      const errorMsg = { role: 'ai', text, sources: [] };
-      setMessages(prev => [...prev, errorMsg]);
-    }
-    setLoading(false);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (user) {
-        handleSearch();
-      }
-    }
-  };
-
-  const handleCopy = (text) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  return (
-    <>
-      {/* HEADER */}
-      <header className="header">
-        <div className="brand">
-          <span>🛡️</span>
-          PROJECT SENTINEL
-        </div>
-        <div className="api-key-wrapper">
-          <input
-            type="password"
-            id="apiKey"
-            name="apiKey"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter API Key..."
-            disabled={!!user}
-          />
-          <button onClick={handleConnect} disabled={!!user || loading}>
-            {loading && !user ? 'CONNECTING...' : 'CONNECT'}
-          </button>
-        </div>
-      </header>
-
-      {/* TERMINAL OUTPUT */}
-      <div className="chat-container">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.role}`}>
-            <span className="sender-name">
-              {msg.role === 'user' ? `>> ${user?.username || 'OPERATOR_01'}` : '>> SENTINEL_CORE'}
-            </span>
-            <div className="msg-bubble">
-              {msg.text}
-              {msg.role === 'ai' && (
-                <button className="copy-button" onClick={() => handleCopy(msg.text)}>
-                  📋
-                </button>
-              )}
-            </div>
-            {msg.sources && msg.sources.length > 0 && (
-              <div className="sources-container">
-                <span className="sources-title">Verified Sources:</span>
-                {msg.sources.map((source, idx) => (
-                  <Source key={idx} source={source} />
-                ))}
-              </div>
+// --- COMPONENTS ---
+const Message = ({ author, text, sources, onSourceClick }) => (
+    <Box sx={{ mb: 2, textAlign: author === 'user' ? 'right' : 'left' }}>
+        <Paper
+            elevation={3}
+            sx={{
+                p: 2,
+                display: 'inline-block',
+                maxWidth: '80%',
+                bgcolor: author === 'user' ? 'primary.main' : 'background.paper',
+                color: author === 'user' ? 'white' : 'text.primary',
+            }}
+        >
+            <Markdown>{text}</Markdown>
+            {sources && sources.length > 0 && (
+                <Box sx={{ mt: 1, borderTop: '1px solid #444', pt: 1 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        Verified Sources:
+                    </Typography>
+                    {sources.map((s, i) => (
+                        <Tooltip key={i} title={s.content.substring(0, 500)}>
+                            <Typography
+                                variant="caption"
+                                display="block"
+                                sx={{ color: 'primary.light', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                                onClick={() => onSourceClick(s)}
+                            >
+                                📄 {s.source}
+                            </Typography>
+                        </Tooltip>
+                    ))}
+                </Box>
             )}
-          </div>
-        ))}
+        </Paper>
+    </Box>
+);
 
-        {loading && (
-          <div className="message ai">
-            <span className="sender-name">>> SENTINEL_CORE</span>
-            <div className="msg-bubble" style={{ color: '#94a3b8' }}>
-              Processing secure query...
-            </div>
-          </div>
-        )}
-        <div ref={chatEndRef} />
-      </div>
+const DocumentViewer = ({ source, onClose, onPrint }) => {
+    if (!source) return null;
 
-      {/* INPUT CONSOLE */}
-      <div className="input-area">
-        <div className="input-wrapper">
-          <textarea
-            id="query"
-            name="query"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={user ? "Enter command..." : "Awaiting secure connection..."}
-            disabled={!user || loading}
-          />
-          <button onClick={handleSearch} disabled={!user || loading}>
-            {loading ? 'BUSY' : 'EXECUTE'}
-          </button>
-        </div>
-      </div>
-    </>
-  );
+    return (
+        <Paper elevation={6} sx={{ p: 2, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="h6">{source.source}</Typography>
+                <div>
+                    <IconButton onClick={onPrint}><PrintIcon /></IconButton>
+                    <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                </div>
+            </Box>
+            <Paper id="printable-area" variant="outlined" sx={{ p: 2, flexGrow: 1, overflowY: 'auto', whiteSpace: 'pre-wrap', backgroundColor: '#2d2d2d' }}>
+                {source.content}
+            </Paper>
+        </Paper>
+    );
+};
+
+const LoginPage = ({ onConnect }) => {
+    const [apiKey, setApiKey] = useState('');
+    const [showApiKey, setShowApiKey] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleConnect = async () => {
+        if (!apiKey) {
+            setError('API Key is required.');
+            return;
+        }
+        setLoading(true);
+        setError('');
+        try {
+            const res = await apiClient.verify(apiKey);
+            if (!res.ok) throw new Error('Invalid API Key or connection issue.');
+            const userData = await res.json();
+            onConnect(apiKey, userData);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Container maxWidth="sm" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100vh' }}>
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <ShieldIcon sx={{ fontSize: 60, color: 'primary.main' }} />
+                <Typography variant="h4" component="h1">Project Sentinel</Typography>
+                <Typography variant="subtitle1" color="text.secondary">Intelligence Without the Internet.</Typography>
+            </Box>
+            <TextField
+                label="Enter API Key"
+                variant="outlined"
+                fullWidth
+                type={showApiKey ? 'text' : 'password'}
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleConnect()}
+                disabled={loading}
+                sx={{ mb: 2 }}
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton onClick={() => setShowApiKey(!showApiKey)} edge="end">
+                                {showApiKey ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
+            />
+            <Button variant="contained" onClick={handleConnect} disabled={loading}>
+                {loading ? <CircularProgress size={24} /> : 'Connect'}
+            </Button>
+            {error && <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>{error}</Typography>}
+        </Container>
+    );
+};
+
+const UploadDialog = ({ open, onClose, onUpload }) => {
+    const [file, setFile] = useState(null);
+
+    const handleUpload = () => {
+        if (file) {
+            onUpload(file);
+            onClose();
+        }
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>Upload a New Document</DialogTitle>
+            <DialogContent>
+                <input
+                    type="file"
+                    onChange={(e) => setFile(e.target.files[0])}
+                    style={{ marginTop: '20px' }}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={handleUpload} variant="contained">Upload</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+// --- MAIN APP ---
+function App() {
+    const [apiKey, setApiKey] = useState(null);
+    const [user, setUser] = useState(null);
+    const [input, setInput] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [selectedSource, setSelectedSource] = useState(null);
+    const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState('');
+    const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const handleConnect = (key, userData) => {
+        setApiKey(key);
+        setUser(userData);
+        setMessages([{
+            author: 'system',
+            text: `Welcome, **${userData.username}**. Secure enclave established. You may now enter your commands.`,
+        }]);
+    };
+
+    const handleSend = async () => {
+        if (!input.trim()) return;
+        const userMessage = { author: 'user', text: input };
+        setMessages((prev) => [...prev, userMessage]);
+        setInput('');
+        setLoading(true);
+        try {
+            const res = await apiClient.chat(apiKey, input);
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({ detail: 'An unknown error occurred.' }));
+                throw new Error(errData.detail);
+            }
+            const data = await res.json();
+            setMessages((prev) => [...prev, { author: 'system', text: data.response, sources: data.sources }]);
+        } catch (err) {
+            setMessages((prev) => [...prev, { author: 'system', text: `⚠️ **Error:** ${err.message}` }]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpload = async (file) => {
+        setLoading(true);
+        setUploadStatus(`Uploading ${file.name}...`);
+        try {
+            const res = await apiClient.upload(apiKey, file);
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({ detail: 'An unknown error occurred.' }));
+                throw new Error(errData.detail);
+            }
+            const data = await res.json();
+            setUploadStatus(`Successfully uploaded: ${data.filename}`);
+            setMessages((prev) => [...prev, { author: 'system', text: `New document uploaded: **${data.filename}**` }]);
+        } catch (err) {
+            setUploadStatus(`Upload failed: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handlePrint = () => {
+        const printableArea = document.getElementById('printable-area').innerHTML;
+        const printWindow = window.open('', '', 'height=500,width=800');
+        printWindow.document.write('<html><head><title>Print</title></head><body>');
+        printWindow.document.write(printableArea);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    };
+
+    if (!user) {
+        return <LoginPage onConnect={handleConnect} />;
+    }
+
+    return (
+        <Box sx={{ display: 'flex', height: '100vh' }}>
+            <CssBaseline />
+            <AppBar position="fixed">
+                <Toolbar>
+                    <ShieldIcon sx={{ mr: 2 }} />
+                    <Typography variant="h6" noWrap>Project Sentinel</Typography>
+                    <Box sx={{ flexGrow: 1 }} />
+                    <Button color="inherit" startIcon={<CloudUploadIcon />} onClick={() => setUploadDialogOpen(true)}>
+                        Upload File
+                    </Button>
+                    <Typography variant="subtitle1" sx={{ ml: 2 }}>
+                        User: {user.username} | Roles: {user.roles.join(', ')}
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <UploadDialog
+                open={uploadDialogOpen}
+                onClose={() => setUploadDialogOpen(false)}
+                onUpload={handleUpload}
+            />
+            <Grid container sx={{ height: '100%', pt: '64px' }}>
+                <Grid item xs={12} md={selectedSource ? 6 : 12} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto' }}>
+                        {uploadStatus && <Typography sx={{ p: 1, color: 'text.secondary' }}>{uploadStatus}</Typography>}
+                        {messages.map((msg, index) => (
+                            <Message key={index} {...msg} onSourceClick={setSelectedSource} />
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </Box>
+                    <Box sx={{ p: 2, borderTop: '1px solid #444' }}>
+                        <TextField
+                            placeholder="Enter your command..."
+                            fullWidth
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                            disabled={loading}
+                            InputProps={{
+                                endAdornment: (
+                                    <IconButton onClick={handleSend} disabled={loading}>
+                                        {loading ? <CircularProgress size={24} /> : <SendIcon />}
+                                    </IconButton>
+                                ),
+                            }}
+                        />
+                    </Box>
+                </Grid>
+                {selectedSource && (
+                    <Grid item xs={12} md={6} sx={{ borderLeft: '1px solid #444', height: '100%' }}>
+                        <DocumentViewer source={selectedSource} onClose={() => setSelectedSource(null)} onPrint={handlePrint} />
+                    </Grid>
+                )}
+            </Grid>
+        </Box>
+    );
 }
 
-export default App;
+function AppWrapper() {
+    return (
+        <ThemeProvider theme={theme}>
+            <App />
+        </ThemeProvider>
+    );
+}
+
+export default AppWrapper;

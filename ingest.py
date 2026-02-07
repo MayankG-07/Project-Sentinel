@@ -64,10 +64,8 @@ def ingest_data():
         return
 
     logger.info(f"\n--- Vectorizing {len(all_chunks)} document chunks (This may take a moment) ---")
-    # Initialize HuggingFaceEmbeddings with num_workers for parallel embedding
     embeddings = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME,
-        encode_kwargs={'num_workers': cpu_count()}
+        model_name=EMBEDDING_MODEL_NAME
     )
 
     Chroma.from_documents(
