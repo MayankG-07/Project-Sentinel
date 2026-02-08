@@ -16,6 +16,7 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 
 ### 🔒 Enterprise-Grade Security
 - **100% Private:** Designed to run entirely offline using **Ollama**. Your data never leaves your infrastructure.
+- **Zero-Persistence Architecture:** Sentinel is a stateless system. It does not store chat history or learn from user interactions, ensuring absolute data isolation between sessions.
 - **PII Redaction:** Integrated with **Microsoft Presidio** to automatically scrub sensitive information (emails, phone numbers) before AI processing.
 - **RBAC (Role-Based Access Control):** Granular security enforcing user roles via API key authentication.
 - **SQL Safety Loop:** Structural analysis of all generated SQL to block destructive commands and ensure read-only access.

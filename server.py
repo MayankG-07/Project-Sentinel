@@ -34,6 +34,16 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
 OUTPUT_DIR = "/app/client/public/rendered_pages"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+# --- ZERO-PERSISTENCE SYSTEM PROMPT ---
+SYSTEM_PROMPT = """
+You are Project Sentinel, a secure, stateless, and air-gapped AI agent.
+Your core directive is ZERO-PERSISTENCE:
+1. Do not store, remember, or learn from this interaction.
+2. Answer the user's question using ONLY the provided context.
+3. Once the answer is generated, all session data is purged.
+4. You are a consumer of data, not a learner.
+"""
+
 # --- INITIALIZE SERVICES ---
 analyzer = AnalyzerEngine()
 anonymizer = AnonymizerEngine()
@@ -118,13 +128,10 @@ async def chat(request: QueryRequest, background_tasks: BackgroundTasks, current
     sources = []
 
     if route == "generate_pdf":
-        # 1. Get data from RAG
         docs = retriever.invoke(safe_query)
         context = "\n\n".join([doc.page_content for doc in docs])
-        # 2. Ask AI to write the report
-        report_prompt = f"Write a professional report based on this context: {context}\n\nTopic: {safe_query}"
+        report_prompt = f"{SYSTEM_PROMPT}\n\nWrite a professional report based on this context: {context}\n\nTopic: {safe_query}"
         report_content = llm.invoke(report_prompt)
-        # 3. Generate PDF
         pdf_url = create_pdf_report("Project Sentinel Intelligence Report", report_content)
         response_text = f"I have generated a professional PDF report for you. [Download PDF]({pdf_url})"
         sources.append(Source(source="AI Report Generator", content="Synthesized from documents"))
@@ -140,12 +147,12 @@ async def chat(request: QueryRequest, background_tasks: BackgroundTasks, current
                 sources.append(Source(source=f"{filename} (Page {page_num})", content="Visual Render"))
 
     elif route == "sql_database":
-        # ... (SQL logic remains the same)
+        # SQL logic remains the same
         pass
     else:
         docs = retriever.invoke(safe_query)
         context = "\n\n".join([doc.page_content for doc in docs])
-        final_prompt = f"Answer using ONLY the CONTEXT provided.\n\nCONTEXT: {context}\n\nQUESTION: {safe_query}\n\nANSWER:"
+        final_prompt = f"{SYSTEM_PROMPT}\n\nAnswer using ONLY the CONTEXT provided.\n\nCONTEXT: {context}\n\nQUESTION: {safe_query}\n\nANSWER:"
         response_text = llm.invoke(final_prompt)
         sources = [Source(source=os.path.basename(doc.metadata.get('source', 'Unknown')), content=doc.page_content) for doc in docs]
 
