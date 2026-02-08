@@ -12,18 +12,19 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 - **Dual-Engine Brain:** Seamlessly switches between a **ChromaDB Vector Store** (for documents) and **SQL Databases** (for structured data).
 - **Intelligent Routing:** Uses an advanced LLM-based router to determine the best data source for every query.
 - **Visual Page Rendering:** Don't just read the text—see the original document. Sentinel can render and display high-quality images of specific PDF pages directly in the chat.
+- **AI PDF Generation:** Transform AI insights into professional documents. Sentinel can generate formal PDF reports based on your queries and data.
 
 ### 🔒 Enterprise-Grade Security
 - **100% Private:** Designed to run entirely offline using **Ollama**. Your data never leaves your infrastructure.
 - **PII Redaction:** Integrated with **Microsoft Presidio** to automatically scrub sensitive information (emails, phone numbers) before AI processing.
-- **RBAC (Role-Based Access Control):** Granular security enforcing user roles (`admin`, `finance`, `legal`) via API key authentication.
+- **RBAC (Role-Based Access Control):** Granular security enforcing user roles via API key authentication.
 - **SQL Safety Loop:** Structural analysis of all generated SQL to block destructive commands and ensure read-only access.
-- **Forensic Auditing:** Detailed `audit.log` records every query, user, and data source for compliance.
+- **Aggressive Auto-Cleanup:** All rendered images and generated reports are automatically deleted from the server after 10 minutes to maintain data privacy.
 
 ### 💻 Professional User Experience
 - **Modern Split-Screen UI:** A sleek, dark-mode interface featuring a dedicated document viewer and interactive chat.
+- **Perfectly Margined Visuals:** Rendered document pages are displayed with professional styling, including shadows, borders, and rounded corners.
 - **Secure Login:** Dedicated authentication page with API key visibility toggles.
-- **Source Verification:** Every answer is backed by "Verified Sources," showing you exactly where the data came from.
 
 ---
 
@@ -35,6 +36,7 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 - **LLM Engine:** Ollama (Llama 3)
 - **Vector Database:** ChromaDB
 - **SQL Database:** PostgreSQL (Supabase) / SQLite
+- **Document Processing:** PyMuPDF (Rendering), FPDF2 (Generation)
 - **Deployment:** Docker, Docker Compose
 
 ---
@@ -58,10 +60,6 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 
 2. **Configure Environment:**
    Create a `.env` file in the root directory based on the provided `.env.example`.
-   ```sh
-   # Example .env entry for Live SQL
-   SQL_CONNECTION_STRING=postgresql://user:pass@IP_ADDRESS:5432/postgres
-   ```
 
 3. **Ingest Documents:**
    Place your PDFs in the `Data/` folder and vectorize them:
@@ -76,20 +74,22 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 
 ---
 
-## 🔑 Access Control
+## 🔑 Access Control Matrix
 
-| User | API Key | Access Level |
-| :--- | :--- | :--- |
-| **Administrator** | `admin_key` | Full Access (SQL + RAG) |
-| **Finance** | `finance_key` | SQL Database Only |
-| **Legal** | `legal_key` | PDF Documents Only |
+The system uses Role-Based Access Control (RBAC) to ensure data privacy. Below are the default credentials configured in `auth.py`:
+
+| User | API Key | Assigned Roles | Data Access Level |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin_key` | `admin`, `finance`, `legal` | **Full Access:** SQL Database + PDF Documents |
+| **Alice** | `finance_key` | `finance` | **Restricted:** SQL Database Only |
+| **Bob** | `legal_key` | `legal` | **Restricted:** PDF Documents Only |
 
 ---
 
 ## 🤝 Contributing
-Project Sentinel is built with a focus on security and modularity. Contributions that enhance privacy or add support for new data sources are welcome.
+This project is currently proprietary. Contributions are welcome for review, but the owners retain all rights to the code.
 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is proprietary and confidential. All rights reserved by Mayank Goyal and Yashi Kulshresth. See the [LICENSE](LICENSE) file for details.
