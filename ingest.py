@@ -1,20 +1,19 @@
 import os
-import pypdf
 import logging
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+import shutil
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
 from dotenv import load_dotenv
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
+import fitz  # PyMuPDF
 
-# --- LOGGING SETUP ---
+# --- CONFIG & LOGGING ---
+load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-# --- CONFIG ---
-load_dotenv()
 
 DATA_PATH = os.getenv("DATA_PATH", "Data")
 DB_PATH = os.getenv("DB_PATH", "chroma_db")
@@ -22,54 +21,76 @@ EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 1000))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 200))
 
-
-def load_and_split_pdf(pdf_path):
-    """Loads a single PDF and splits it into chunks."""
+def load_pdf_with_pymupdf(file_path: str):
+    """Loads a PDF using PyMuPDF for high-quality text extraction."""
     try:
-        logger.debug(f"Processing PDF: {os.path.basename(pdf_path)}")
-        loader = PyPDFLoader(pdf_path)
-        documents = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
-        chunks = text_splitter.split_documents(documents)
-        return chunks
+        doc = fitz.open(file_path)
+        documents = []
+        for page_num, page in enumerate(doc):
+            text = page.get_text("text")
+            if text:
+                documents.append(Document(
+                    page_content=text,
+                    metadata={"source": file_path, "page": page_num}
+                ))
+        # Add a final metadata document for the whole file
+        documents.append(Document(
+            page_content=f"This document '{os.path.basename(file_path)}' has {len(doc)} pages.",
+            metadata={"source": file_path, "type": "metadata", "total_pages": len(doc)}
+        ))
+        return documents
     except Exception as e:
-        logger.error(f"Error processing {os.path.basename(pdf_path)}: {e}")
+        logger.error(f"Error processing {os.path.basename(file_path)} with PyMuPDF: {e}")
         return []
 
-def ingest_data():
-    logger.info(f"--- Scanning {DATA_PATH} for PDFs ---")
+def process_documents(file_paths):
+    """Loads and splits a list of documents in parallel."""
+    pdf_files = [p for p in file_paths if p.lower().endswith(".pdf")]
+    
+    with Pool(processes=min(cpu_count(), len(pdf_files))) as pool:
+        all_docs = []
+        with tqdm(total=len(pdf_files), desc="Loading Documents") as pbar:
+            for docs in pool.imap_unordered(load_pdf_with_pymupdf, pdf_files):
+                all_docs.extend(docs)
+                pbar.update()
+    
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+    chunks = text_splitter.split_documents(all_docs)
+    return chunks
 
+def ingest_data():
+    logger.info(f"--- Scanning {DATA_PATH} for documents ---")
     if not os.path.exists(DATA_PATH):
         os.makedirs(DATA_PATH)
-        logger.info(f"Created {DATA_PATH} folder. Please add your PDF documents there.")
+        logger.info(f"Created {DATA_PATH} folder. Please add your documents there.")
         return
 
-    pdf_files = [os.path.join(DATA_PATH, file) for file in os.listdir(DATA_PATH) if file.endswith(".pdf")]
-
-    if not pdf_files:
-        logger.warning(f"No PDF files found in '{DATA_PATH}' folder. Nothing to ingest.")
+    all_files = [os.path.join(DATA_PATH, f) for f in os.listdir(DATA_PATH)]
+    if not all_files:
+        logger.warning(f"No files found in '{DATA_PATH}'. Nothing to ingest.")
         return
 
-    logger.info(f"Found {len(pdf_files)} PDF(s) to process.")
-
-    with Pool(cpu_count()) as pool:
-        all_chunks = []
-        with tqdm(total=len(pdf_files), desc="Loading and Splitting PDFs") as pbar:
-            for chunks in pool.imap_unordered(load_and_split_pdf, pdf_files):
-                all_chunks.extend(chunks)
-                pbar.update()
-
-    if not all_chunks:
-        logger.error("No content could be extracted from the PDFs. Please check the file formats and content.")
+    logger.info(f"Found {len(all_files)} file(s) to process.")
+    
+    chunks = process_documents(all_files)
+    if not chunks:
+        logger.error("No content could be extracted from the documents.")
         return
 
-    logger.info(f"\n--- Vectorizing {len(all_chunks)} document chunks (This may take a moment) ---")
-    embeddings = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME
-    )
+    logger.info(f"\n--- Vectorizing {len(chunks)} document chunks ---")
+    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+    
+    # Ensure the directory is clean before ingestion
+    # Note: This may fail if the directory is locked by another process
+    if os.path.exists(DB_PATH):
+        try:
+            shutil.rmtree(DB_PATH)
+            logger.info(f"Removed existing database at {DB_PATH}")
+        except Exception as e:
+            logger.warning(f"Could not remove {DB_PATH}: {e}. Proceeding with update.")
 
     Chroma.from_documents(
-        documents=all_chunks,
+        documents=chunks,
         embedding=embeddings,
         persist_directory=DB_PATH
     )

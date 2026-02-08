@@ -16,20 +16,14 @@ import {
     IconButton,
     InputAdornment,
     Tooltip,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
 } from '@mui/material';
 import {
     Send as SendIcon,
-    ContentCopy as ContentCopyIcon,
     Shield as ShieldIcon,
     Visibility,
     VisibilityOff,
     Close as CloseIcon,
     Print as PrintIcon,
-    CloudUpload as CloudUploadIcon,
 } from '@mui/icons-material';
 import Markdown from 'react-markdown';
 
@@ -39,6 +33,7 @@ export const theme = createTheme({
         mode: 'dark',
         primary: { main: '#00A8E8' },
         background: { default: '#121212', paper: '#1E1E1E' },
+        text: { primary: '#ffffff', secondary: 'rgba(255, 255, 255, 0.7)' }
     },
     typography: {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
@@ -55,47 +50,55 @@ const apiClient = {
         headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
         body: JSON.stringify({ text }),
     }),
-    upload: (apiKey, file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        return fetch(`${API_URL}/upload`, {
-            method: 'POST',
-            headers: { 'X-API-Key': apiKey },
-            body: formData,
-        });
-    },
 };
 
 // --- COMPONENTS ---
 const Message = ({ author, text, sources, onSourceClick }) => (
-    <Box sx={{ mb: 2, textAlign: author === 'user' ? 'right' : 'left' }}>
+    <Box sx={{ mb: 3, textAlign: author === 'user' ? 'right' : 'left' }}>
         <Paper
             elevation={3}
             sx={{
                 p: 2,
                 display: 'inline-block',
-                maxWidth: '80%',
+                maxWidth: '90%',
                 bgcolor: author === 'user' ? 'primary.main' : 'background.paper',
-                color: author === 'user' ? 'white' : 'text.primary',
+                color: 'white',
+                borderRadius: 2,
+                '& img': {
+                    maxWidth: '100%',
+                    height: 'auto',
+                    borderRadius: '8px',
+                    marginTop: '16px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                    border: '1px solid #444',
+                    display: 'block',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                },
+                '& a': {
+                    color: '#00A8E8',
+                    fontWeight: 'bold',
+                    textDecoration: 'none',
+                    '&:hover': { textDecoration: 'underline' },
+                }
             }}
         >
             <Markdown>{text}</Markdown>
             {sources && sources.length > 0 && (
-                <Box sx={{ mt: 1, borderTop: '1px solid #444', pt: 1 }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                <Box sx={{ mt: 2, borderTop: '1px solid #444', pt: 1 }}>
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>
                         Verified Sources:
                     </Typography>
                     {sources.map((s, i) => (
-                        <Tooltip key={i} title={s.content.substring(0, 500)}>
-                            <Typography
-                                variant="caption"
-                                display="block"
-                                sx={{ color: 'primary.light', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-                                onClick={() => onSourceClick(s)}
-                            >
-                                📄 {s.source}
-                            </Typography>
-                        </Tooltip>
+                        <Typography
+                            key={i}
+                            variant="caption"
+                            display="block"
+                            sx={{ color: 'primary.light', cursor: 'pointer', mt: 0.5, '&:hover': { textDecoration: 'underline' } }}
+                            onClick={() => onSourceClick(s)}
+                        >
+                            📄 {s.source}
+                        </Typography>
                     ))}
                 </Box>
             )}
@@ -103,19 +106,15 @@ const Message = ({ author, text, sources, onSourceClick }) => (
     </Box>
 );
 
-const DocumentViewer = ({ source, onClose, onPrint }) => {
+const DocumentViewer = ({ source, onClose }) => {
     if (!source) return null;
-
     return (
-        <Paper elevation={6} sx={{ p: 2, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h6">{source.source}</Typography>
-                <div>
-                    <IconButton onClick={onPrint}><PrintIcon /></IconButton>
-                    <IconButton onClick={onClose}><CloseIcon /></IconButton>
-                </div>
+        <Paper elevation={6} sx={{ p: 2, height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" noWrap>{source.source}</Typography>
+                <IconButton onClick={onClose}><CloseIcon /></IconButton>
             </Box>
-            <Paper id="printable-area" variant="outlined" sx={{ p: 2, flexGrow: 1, overflowY: 'auto', whiteSpace: 'pre-wrap', backgroundColor: '#2d2d2d' }}>
+            <Paper variant="outlined" sx={{ p: 2, flexGrow: 1, overflowY: 'auto', whiteSpace: 'pre-wrap', bgcolor: '#1a1a1a' }}>
                 {source.content}
             </Paper>
         </Paper>
@@ -129,10 +128,7 @@ const LoginPage = ({ onConnect }) => {
     const [error, setError] = useState('');
 
     const handleConnect = async () => {
-        if (!apiKey) {
-            setError('API Key is required.');
-            return;
-        }
+        if (!apiKey) { setError('API Key is required.'); return; }
         setLoading(true);
         setError('');
         try {
@@ -150,63 +146,48 @@ const LoginPage = ({ onConnect }) => {
     return (
         <Container maxWidth="sm" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100vh' }}>
             <Box sx={{ textAlign: 'center', mb: 4 }}>
-                <ShieldIcon sx={{ fontSize: 60, color: 'primary.main' }} />
-                <Typography variant="h4" component="h1">Project Sentinel</Typography>
-                <Typography variant="subtitle1" color="text.secondary">Intelligence Without the Internet.</Typography>
+                <ShieldIcon sx={{ fontSize: 80, color: 'primary.main', mb: 2 }} />
+                <Typography variant="h3" component="h1" gutterBottom>Project Sentinel</Typography>
+                <Typography variant="h6" color="text.secondary">Intelligence Without the Internet.</Typography>
             </Box>
-            <TextField
-                label="Enter API Key"
-                variant="outlined"
-                fullWidth
-                type={showApiKey ? 'text' : 'password'}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleConnect()}
-                disabled={loading}
-                sx={{ mb: 2 }}
-                InputProps={{
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            <IconButton onClick={() => setShowApiKey(!showApiKey)} edge="end">
-                                {showApiKey ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                        </InputAdornment>
-                    ),
-                }}
-            />
-            <Button variant="contained" onClick={handleConnect} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : 'Connect'}
-            </Button>
-            {error && <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>{error}</Typography>}
-        </Container>
-    );
-};
-
-const UploadDialog = ({ open, onClose, onUpload }) => {
-    const [file, setFile] = useState(null);
-
-    const handleUpload = () => {
-        if (file) {
-            onUpload(file);
-            onClose();
-        }
-    };
-
-    return (
-        <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Upload a New Document</DialogTitle>
-            <DialogContent>
-                <input
-                    type="file"
-                    onChange={(e) => setFile(e.target.files[0])}
-                    style={{ marginTop: '20px' }}
+            <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
+                <TextField
+                    label="Enter API Key"
+                    variant="outlined"
+                    fullWidth
+                    type={showApiKey ? 'text' : 'password'}
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleConnect()}
+                    disabled={loading}
+                    sx={{ 
+                        mb: 3,
+                        '& .MuiInputBase-input': { color: 'white' },
+                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' }
+                    }}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => setShowApiKey(!showApiKey)} edge="end">
+                                    {showApiKey ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleUpload} variant="contained">Upload</Button>
-            </DialogActions>
-        </Dialog>
+                <Button 
+                    variant="contained" 
+                    fullWidth 
+                    size="large"
+                    onClick={handleConnect} 
+                    disabled={loading}
+                    sx={{ height: 56 }}
+                >
+                    {loading ? <CircularProgress size={24} /> : 'Establish Secure Connection'}
+                </Button>
+                {error && <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>{error}</Typography>}
+            </Paper>
+        </Container>
     );
 };
 
@@ -218,8 +199,6 @@ function App() {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedSource, setSelectedSource] = useState(null);
-    const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-    const [uploadStatus, setUploadStatus] = useState('');
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -256,70 +235,30 @@ function App() {
         }
     };
 
-    const handleUpload = async (file) => {
-        setLoading(true);
-        setUploadStatus(`Uploading ${file.name}...`);
-        try {
-            const res = await apiClient.upload(apiKey, file);
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({ detail: 'An unknown error occurred.' }));
-                throw new Error(errData.detail);
-            }
-            const data = await res.json();
-            setUploadStatus(`Successfully uploaded: ${data.filename}`);
-            setMessages((prev) => [...prev, { author: 'system', text: `New document uploaded: **${data.filename}**` }]);
-        } catch (err) {
-            setUploadStatus(`Upload failed: ${err.message}`);
-        } finally {
-            setLoading(false);
-        }
-    };
-    
-    const handlePrint = () => {
-        const printableArea = document.getElementById('printable-area').innerHTML;
-        const printWindow = window.open('', '', 'height=500,width=800');
-        printWindow.document.write('<html><head><title>Print</title></head><body>');
-        printWindow.document.write(printableArea);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
-    };
-
-    if (!user) {
-        return <LoginPage onConnect={handleConnect} />;
-    }
+    if (!user) return <LoginPage onConnect={handleConnect} />;
 
     return (
-        <Box sx={{ display: 'flex', height: '100vh' }}>
+        <Box sx={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
             <CssBaseline />
-            <AppBar position="fixed">
+            <AppBar position="static" elevation={0} sx={{ borderBottom: '1px solid #333' }}>
                 <Toolbar>
-                    <ShieldIcon sx={{ mr: 2 }} />
-                    <Typography variant="h6" noWrap>Project Sentinel</Typography>
-                    <Box sx={{ flexGrow: 1 }} />
-                    <Button color="inherit" startIcon={<CloudUploadIcon />} onClick={() => setUploadDialogOpen(true)}>
-                        Upload File
-                    </Button>
-                    <Typography variant="subtitle1" sx={{ ml: 2 }}>
+                    <ShieldIcon sx={{ mr: 2, color: 'primary.main' }} />
+                    <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>Project Sentinel</Typography>
+                    <Typography variant="subtitle2" sx={{ opacity: 0.8 }}>
                         User: {user.username} | Roles: {user.roles.join(', ')}
                     </Typography>
                 </Toolbar>
             </AppBar>
-            <UploadDialog
-                open={uploadDialogOpen}
-                onClose={() => setUploadDialogOpen(false)}
-                onUpload={handleUpload}
-            />
-            <Grid container sx={{ height: '100%', pt: '64px' }}>
-                <Grid item xs={12} md={selectedSource ? 6 : 12} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto' }}>
-                        {uploadStatus && <Typography sx={{ p: 1, color: 'text.secondary' }}>{uploadStatus}</Typography>}
+
+            <Grid container sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                <Grid item xs={12} md={selectedSource ? 6 : 12} sx={{ display: 'flex', flexDirection: 'column', height: '100%', transition: 'all 0.3s ease' }}>
+                    <Box sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>
                         {messages.map((msg, index) => (
                             <Message key={index} {...msg} onSourceClick={setSelectedSource} />
                         ))}
                         <div ref={messagesEndRef} />
                     </Box>
-                    <Box sx={{ p: 2, borderTop: '1px solid #444' }}>
+                    <Box sx={{ p: 3, borderTop: '1px solid #333', bgcolor: 'background.default' }}>
                         <TextField
                             placeholder="Enter your command..."
                             fullWidth
@@ -329,7 +268,7 @@ function App() {
                             disabled={loading}
                             InputProps={{
                                 endAdornment: (
-                                    <IconButton onClick={handleSend} disabled={loading}>
+                                    <IconButton onClick={handleSend} disabled={loading} color="primary">
                                         {loading ? <CircularProgress size={24} /> : <SendIcon />}
                                     </IconButton>
                                 ),
@@ -338,8 +277,8 @@ function App() {
                     </Box>
                 </Grid>
                 {selectedSource && (
-                    <Grid item xs={12} md={6} sx={{ borderLeft: '1px solid #444', height: '100%' }}>
-                        <DocumentViewer source={selectedSource} onClose={() => setSelectedSource(null)} onPrint={handlePrint} />
+                    <Grid item xs={12} md={6} sx={{ borderLeft: '1px solid #333', height: '100%', p: 2, bgcolor: '#161616' }}>
+                        <DocumentViewer source={selectedSource} onClose={() => setSelectedSource(null)} />
                     </Grid>
                 )}
             </Grid>
@@ -347,12 +286,10 @@ function App() {
     );
 }
 
-function AppWrapper() {
+export default function AppWrapper() {
     return (
         <ThemeProvider theme={theme}>
             <App />
         </ThemeProvider>
     );
 }
-
-export default AppWrapper;

@@ -10,11 +10,15 @@ services:
       - ./chroma_db:/app/chroma_db
       - ./db_data:/app/db_data
       - ./Data:/app/Data
+      # Shared volume for rendered page images
+      - ./client/public/rendered_pages:/app/client/public/rendered_pages
     env_file:
       - .env
     command: uvicorn server:app --host 0.0.0.0 --port 8000
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    dns:
+      - 8.8.8.8
 
   frontend:
     build:
@@ -27,6 +31,9 @@ services:
       - "8080:80"
     depends_on:
       - backend
+    # Mount the shared volume for serving the images
+    volumes:
+      - ./client/public/rendered_pages:/usr/share/nginx/html/rendered_pages
 
 networks:
   default:
