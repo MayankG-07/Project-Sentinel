@@ -11,13 +11,14 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 ### 🧠 Hybrid Intelligence
 - **Multi-Source Reasoning Engine:** Sentinel performs parallel analysis across both SQL databases and PDF documents for every query, synthesizing a unified, intelligent response.
 - **Dual-Engine Brain:** Seamlessly integrates a **ChromaDB Vector Store** (for documents) and **SQL Databases** (for structured data).
+- **Enhanced SQL Robustness:** Advanced prompt engineering ensures the AI generates valid, read-only SQL queries for complex multi-table analysis.
 - **Visual Page Rendering:** Don't just read the text—see the original document. Sentinel can render and display high-quality images of specific PDF pages directly in the chat.
 - **AI PDF Generation:** Transform AI insights into professional documents. Sentinel can generate formal PDF reports based on your queries and data.
 
 ### 🔒 Enterprise-Grade Security
 - **100% Private:** Designed to run entirely offline using **Ollama**. Your data never leaves your infrastructure.
 - **Zero-Persistence Architecture:** Sentinel is a stateless system. It does not store chat history or learn from user interactions, ensuring absolute data isolation between sessions.
-- **Forensic Audit Logging:** Every interaction is recorded in a structured, tamper-evident `forensic_audit.log`, capturing timestamps, user identities, queries, and data sources accessed.
+- **Verbose Forensic Auditing:** Every interaction is recorded in a structured `forensic_audit.log`, capturing timestamps, user identities, AI-generated SQL, and data sources accessed for complete accountability.
 - **PII Redaction:** Integrated with **Microsoft Presidio** to automatically scrub sensitive information (emails, phone numbers) before AI processing.
 - **RBAC (Role-Based Access Control):** Granular security enforcing user roles via API key authentication.
 - **SQL Safety Loop:** Structural analysis of all generated SQL to block destructive commands and ensure read-only access.
