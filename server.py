@@ -27,11 +27,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 load_dotenv()
 
-# Forensic Audit Logger Setup
 AUDIT_LOG_FILE = "forensic_audit.log"
 
 def log_forensic_audit(user_data: dict, query: str, sources: list, status: str = "SUCCESS"):
-    """Writes a tamper-evident, structured entry to the forensic audit log."""
     audit_entry = {
         "timestamp": datetime.utcnow().isoformat(),
         "request_id": str(uuid.uuid4()),
@@ -43,7 +41,6 @@ def log_forensic_audit(user_data: dict, query: str, sources: list, status: str =
     }
     with open(AUDIT_LOG_FILE, "a") as f:
         f.write(json.dumps(audit_entry) + "\n")
-    logger.info(f"Forensic Audit Entry Created: {audit_entry['request_id']}")
 
 DB_PATH = os.getenv("DB_PATH", "chroma_db")
 MODEL_NAME = os.getenv("MODEL_NAME", "llama3")
@@ -99,11 +96,25 @@ def clean_db_result(result):
 def run_secure_sql(query_text: str, db: SQLDatabase, llm: OllamaLLM):
     try:
         schema = db.get_table_info()
-        prompt = f"Write a SQL SELECT query for this question: {query_text}\nSchema: {schema}\nReturn ONLY SQL."
+        # Improved prompt to ensure valid SQL
+        prompt = f"You are a SQL expert. Write a standard SQL SELECT query to answer this question: {query_text}\n\nSchema:\n{schema}\n\nReturn ONLY the SQL code. No explanation."
         generated_sql = llm.invoke(prompt).strip().replace("```sql", "").replace("```", "")
-        if "SELECT" not in generated_sql.upper(): return None
-        return db.run(generated_sql)
-    except: return None
+        
+        # Clean up the generated SQL
+        generated_sql = generated_sql.split(';')[0] + ';'
+        
+        logger.info(f"AI Generated SQL: {generated_sql}")
+        
+        if "SELECT" not in generated_sql.upper():
+            logger.warning("AI failed to generate a SELECT query.")
+            return None
+            
+        result = db.run(generated_sql)
+        logger.info(f"Database Result: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"SQL Execution Error: {e}")
+        return None
 
 # --- INITIALIZE ENGINES ---
 llm = OllamaLLM(base_url=OLLAMA_HOST, model=MODEL_NAME, temperature=0)
@@ -127,7 +138,7 @@ async def chat(request: QueryRequest, background_tasks: BackgroundTasks, current
         db_raw = run_secure_sql(safe_query, sql_db, llm)
         db_clean = clean_db_result(db_raw)
         if db_clean:
-            sources.append(Source(source="SQL Database", content=f"Database Result: {db_clean}"))
+            sources.append(Source(source="Live Online Database (Supabase)", content=f"Data: {db_clean}"))
 
         # 2. GET DATA FROM RAG
         docs = retriever.invoke(safe_query)
@@ -145,12 +156,11 @@ async def chat(request: QueryRequest, background_tasks: BackgroundTasks, current
         """
         response_text = llm.invoke(synthesis_prompt)
 
-        # 4. FORENSIC AUDIT LOGGING
         log_forensic_audit(current_user, request.text, sources, "SUCCESS")
-
         return ChatResponse(response=response_text, sources=sources)
 
     except Exception as e:
+        logger.error(f"Chat Error: {e}")
         log_forensic_audit(current_user, request.text, [], f"FAILED: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
