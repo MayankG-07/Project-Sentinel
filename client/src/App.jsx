@@ -15,7 +15,9 @@ import {
     Grid,
     IconButton,
     InputAdornment,
-    Tooltip,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
 } from '@mui/material';
 import {
     Send as SendIcon,
@@ -23,7 +25,7 @@ import {
     Visibility,
     VisibilityOff,
     Close as CloseIcon,
-    Print as PrintIcon,
+    ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
 import Markdown from 'react-markdown';
 
@@ -37,20 +39,8 @@ export const theme = createTheme({
     },
     typography: {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-        h4: { fontWeight: 700 },
     },
 });
-
-// --- API ---
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const apiClient = {
-    verify: (apiKey) => fetch(`${API_URL}/auth/verify`, { headers: { 'X-API-Key': apiKey } }),
-    chat: (apiKey, text) => fetch(`${API_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
-        body: JSON.stringify({ text }),
-    }),
-};
 
 // --- COMPONENTS ---
 const Message = ({ author, text, sources, onSourceClick }) => (
@@ -75,32 +65,31 @@ const Message = ({ author, text, sources, onSourceClick }) => (
                     marginLeft: 'auto',
                     marginRight: 'auto',
                 },
-                '& a': {
-                    color: '#00A8E8',
-                    fontWeight: 'bold',
-                    textDecoration: 'none',
-                    '&:hover': { textDecoration: 'underline' },
-                }
             }}
         >
             <Markdown>{text}</Markdown>
+            
             {sources && sources.length > 0 && (
-                <Box sx={{ mt: 2, borderTop: '1px solid #444', pt: 1 }}>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>
-                        Verified Sources:
-                    </Typography>
-                    {sources.map((s, i) => (
-                        <Typography
-                            key={i}
-                            variant="caption"
-                            display="block"
-                            sx={{ color: 'primary.light', cursor: 'pointer', mt: 0.5, '&:hover': { textDecoration: 'underline' } }}
-                            onClick={() => onSourceClick(s)}
-                        >
-                            📄 {s.source}
+                <Accordion sx={{ mt: 2, bgcolor: 'rgba(0,0,0,0.2)', backgroundImage: 'none', border: '1px solid #333' }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                        <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+                            Verified Sources ({sources.length})
                         </Typography>
-                    ))}
-                </Box>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 1 }}>
+                        {sources.map((s, i) => (
+                            <Typography
+                                key={i}
+                                variant="caption"
+                                display="block"
+                                sx={{ color: 'rgba(255,255,255,0.7)', cursor: 'pointer', p: 0.5, '&:hover': { color: 'primary.light' } }}
+                                onClick={() => onSourceClick(s)}
+                            >
+                                📄 {s.source}
+                            </Typography>
+                        ))}
+                    </AccordionDetails>
+                </Accordion>
             )}
         </Paper>
     </Box>
@@ -130,10 +119,9 @@ const LoginPage = ({ onConnect }) => {
     const handleConnect = async () => {
         if (!apiKey) { setError('API Key is required.'); return; }
         setLoading(true);
-        setError('');
         try {
-            const res = await apiClient.verify(apiKey);
-            if (!res.ok) throw new Error('Invalid API Key or connection issue.');
+            const res = await fetch('http://localhost:8000/auth/verify', { headers: { 'X-API-Key': apiKey } });
+            if (!res.ok) throw new Error('Invalid API Key');
             const userData = await res.json();
             onConnect(apiKey, userData);
         } catch (err) {
@@ -147,24 +135,17 @@ const LoginPage = ({ onConnect }) => {
         <Container maxWidth="sm" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100vh' }}>
             <Box sx={{ textAlign: 'center', mb: 4 }}>
                 <ShieldIcon sx={{ fontSize: 80, color: 'primary.main', mb: 2 }} />
-                <Typography variant="h3" component="h1" gutterBottom>Project Sentinel</Typography>
+                <Typography variant="h3" gutterBottom>Project Sentinel</Typography>
                 <Typography variant="h6" color="text.secondary">Intelligence Without the Internet.</Typography>
             </Box>
             <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
                 <TextField
                     label="Enter API Key"
-                    variant="outlined"
                     fullWidth
                     type={showApiKey ? 'text' : 'password'}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleConnect()}
-                    disabled={loading}
-                    sx={{ 
-                        mb: 3,
-                        '& .MuiInputBase-input': { color: 'white' },
-                        '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' }
-                    }}
+                    sx={{ mb: 3, '& .MuiInputBase-input': { color: 'white' } }}
                     InputProps={{
                         endAdornment: (
                             <InputAdornment position="end">
@@ -175,14 +156,7 @@ const LoginPage = ({ onConnect }) => {
                         ),
                     }}
                 />
-                <Button 
-                    variant="contained" 
-                    fullWidth 
-                    size="large"
-                    onClick={handleConnect} 
-                    disabled={loading}
-                    sx={{ height: 56 }}
-                >
+                <Button variant="contained" fullWidth size="large" onClick={handleConnect} disabled={loading}>
                     {loading ? <CircularProgress size={24} /> : 'Establish Secure Connection'}
                 </Button>
                 {error && <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>{error}</Typography>}
@@ -191,7 +165,6 @@ const LoginPage = ({ onConnect }) => {
     );
 };
 
-// --- MAIN APP ---
 function App() {
     const [apiKey, setApiKey] = useState(null);
     const [user, setUser] = useState(null);
@@ -205,37 +178,58 @@ function App() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const handleConnect = (key, userData) => {
-        setApiKey(key);
-        setUser(userData);
-        setMessages([{
-            author: 'system',
-            text: `Welcome, **${userData.username}**. Secure enclave established. You may now enter your commands.`,
-        }]);
-    };
-
     const handleSend = async () => {
         if (!input.trim()) return;
         const userMessage = { author: 'user', text: input };
         setMessages((prev) => [...prev, userMessage]);
         setInput('');
         setLoading(true);
+
         try {
-            const res = await apiClient.chat(apiKey, input);
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({ detail: 'An unknown error occurred.' }));
-                throw new Error(errData.detail);
+            const response = await fetch('http://localhost:8000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                body: JSON.stringify({ text: input }),
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+            let sources = [];
+            let sourcesFound = false;
+
+            setMessages((prev) => [...prev, { author: 'system', text: '', sources: [] }]);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value);
+                
+                if (!sourcesFound && chunk.includes('---')) {
+                    const parts = chunk.split('\n---\n');
+                    const sourceData = JSON.parse(parts[0]);
+                    sources = sourceData.sources;
+                    fullText += parts[1];
+                    sourcesFound = true;
+                } else {
+                    fullText += chunk;
+                }
+
+                setMessages((prev) => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = { author: 'system', text: fullText, sources: sources };
+                    return newMessages;
+                });
             }
-            const data = await res.json();
-            setMessages((prev) => [...prev, { author: 'system', text: data.response, sources: data.sources }]);
         } catch (err) {
-            setMessages((prev) => [...prev, { author: 'system', text: `⚠️ **Error:** ${err.message}` }]);
+            setMessages((prev) => [...prev, { author: 'system', text: '⚠️ Connection Error' }]);
         } finally {
             setLoading(false);
         }
     };
 
-    if (!user) return <LoginPage onConnect={handleConnect} />;
+    if (!user) return <LoginPage onConnect={(key, data) => { setApiKey(key); setUser(data); setMessages([{ author: 'system', text: `Welcome, **${data.username}**. Secure enclave established.` }]); }} />;
 
     return (
         <Box sx={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
@@ -243,25 +237,21 @@ function App() {
             <AppBar position="static" elevation={0} sx={{ borderBottom: '1px solid #333' }}>
                 <Toolbar>
                     <ShieldIcon sx={{ mr: 2, color: 'primary.main' }} />
-                    <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>Project Sentinel</Typography>
-                    <Typography variant="subtitle2" sx={{ opacity: 0.8 }}>
-                        User: {user.username} | Roles: {user.roles.join(', ')}
-                    </Typography>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>Project Sentinel</Typography>
+                    <Typography variant="subtitle2">User: {user.username} | Roles: {user.roles.join(', ')}</Typography>
                 </Toolbar>
             </AppBar>
 
             <Grid container sx={{ flexGrow: 1, overflow: 'hidden' }}>
-                <Grid item xs={12} md={selectedSource ? 6 : 12} sx={{ display: 'flex', flexDirection: 'column', height: '100%', transition: 'all 0.3s ease' }}>
+                <Grid item xs={selectedSource ? 6 : 12} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <Box sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>
-                        {messages.map((msg, index) => (
-                            <Message key={index} {...msg} onSourceClick={setSelectedSource} />
-                        ))}
+                        {messages.map((msg, i) => <Message key={i} {...msg} onSourceClick={setSelectedSource} />)}
                         <div ref={messagesEndRef} />
                     </Box>
-                    <Box sx={{ p: 3, borderTop: '1px solid #333', bgcolor: 'background.default' }}>
+                    <Box sx={{ p: 3, borderTop: '1px solid #333' }}>
                         <TextField
-                            placeholder="Enter your command..."
                             fullWidth
+                            placeholder="Enter command..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
@@ -271,13 +261,13 @@ function App() {
                                     <IconButton onClick={handleSend} disabled={loading} color="primary">
                                         {loading ? <CircularProgress size={24} /> : <SendIcon />}
                                     </IconButton>
-                                ),
+                                )
                             }}
                         />
                     </Box>
                 </Grid>
                 {selectedSource && (
-                    <Grid item xs={12} md={6} sx={{ borderLeft: '1px solid #333', height: '100%', p: 2, bgcolor: '#161616' }}>
+                    <Grid item xs={6} sx={{ borderLeft: '1px solid #333', p: 2, bgcolor: '#161616' }}>
                         <DocumentViewer source={selectedSource} onClose={() => setSelectedSource(null)} />
                     </Grid>
                 )}
@@ -287,9 +277,5 @@ function App() {
 }
 
 export default function AppWrapper() {
-    return (
-        <ThemeProvider theme={theme}>
-            <App />
-        </ThemeProvider>
-    );
+    return <ThemeProvider theme={theme}><App /></ThemeProvider>;
 }

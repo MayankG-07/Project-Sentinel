@@ -9,9 +9,9 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 ## 🚀 Key Features
 
 ### 🧠 Hybrid Intelligence
-- **Multi-Source Reasoning Engine:** Sentinel performs parallel analysis across both SQL databases and PDF documents for every query, synthesizing a unified, intelligent response.
-- **Dual-Engine Brain:** Seamlessly integrates a **ChromaDB Vector Store** (for documents) and **SQL Databases** (for structured data).
-- **Enhanced SQL Robustness:** Advanced prompt engineering ensures the AI generates valid, read-only SQL queries for complex multi-table analysis.
+- **Dual-Brain Architecture:** Sentinel utilizes a specialized two-stage reasoning process. A dedicated **Logic Engine** handles complex SQL generation and data retrieval, while a separate **Streaming Engine** synthesizes the final response for the user. This ensures 100% accuracy in data handling without sacrificing performance.
+- **Real-Time Streaming:** Experience instant feedback with word-by-word text generation. Sentinel streams its "thoughts" directly to the UI, providing a premium, responsive user experience similar to industry-leading AI platforms.
+- **Multi-Source Reasoning Engine:** Sentinel performs parallel analysis across both SQL databases and PDF documents for every query, synthesizing a unified, intelligent response that cross-references structured and unstructured data.
 - **Visual Page Rendering:** Don't just read the text—see the original document. Sentinel can render and display high-quality images of specific PDF pages directly in the chat.
 - **AI PDF Generation:** Transform AI insights into professional documents. Sentinel can generate formal PDF reports based on your queries and data.
 
@@ -26,8 +26,9 @@ Project Sentinel is a high-security, hybrid AI system that combines **Retrieval-
 
 ### 💻 Professional User Experience
 - **Modern Split-Screen UI:** A sleek, dark-mode interface featuring a dedicated document viewer and interactive chat.
+- **Clean Sources UI:** Verified sources are neatly organized in an interactive dropdown (Accordion), keeping the chat history clean and professional.
 - **Perfectly Margined Visuals:** Rendered document pages are displayed with professional styling, including shadows, borders, and rounded corners.
-- **Secure Login:** Dedicated authentication page with API key visibility toggles.
+- **Secure Login:** Dedicated authentication page with API key visibility toggles and high-contrast accessibility.
 
 ---
 

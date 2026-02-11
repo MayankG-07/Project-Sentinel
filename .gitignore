@@ -30,6 +30,9 @@ forensic_audit.log
 # Ignore rendered PDF images and generated reports
 client/public/rendered_pages/
 
+# --- Presentation & Private Guides ---
+PRESENTATION_TIPS.md
+
 # --- Node.js / Frontend ---
 client/node_modules/
 client/dist/
