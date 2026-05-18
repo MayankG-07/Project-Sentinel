@@ -5,11 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6292032-0828-4792-a6fd-1785ae2b0047" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/PRESENTATION_TIPS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sentinel.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile.backend" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile.backend" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/encrypt_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/encrypt_users.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/generate_key.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_key.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingest.py" beforeDir="false" afterPath="$PROJECT_DIR$/ingest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -30,7 +35,7 @@
     </selectedModels>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="1713" />
+    <option name="cachedIndexableFilesCount" value="1716" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -70,13 +75,14 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/Project-Sentinel&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Project-Sentinel&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -98,8 +104,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.30387.90" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.31033.145" />
       </set>
     </attachedChunks>
   </component>
@@ -160,7 +166,27 @@
       <workItem from="1770700063140" duration="939000" />
       <workItem from="1770704633879" duration="889000" />
       <workItem from="1770726372944" duration="2926000" />
-      <workItem from="1770811675996" duration="4165000" />
+      <workItem from="1770811675996" duration="4736000" />
+      <workItem from="1770874160480" duration="1701000" />
+      <workItem from="1772296989758" duration="284000" />
+      <workItem from="1772826672228" duration="2164000" />
+      <workItem from="1772863650490" duration="72000" />
+      <workItem from="1772882649254" duration="201000" />
+      <workItem from="1772915768544" duration="2314000" />
+      <workItem from="1772983536006" duration="708000" />
+      <workItem from="1772984563156" duration="2530000" />
+      <workItem from="1773218546027" duration="18000" />
+      <workItem from="1776325580709" duration="162000" />
+      <workItem from="1776441194421" duration="118000" />
+      <workItem from="1777481249126" duration="27000" />
+      <workItem from="1778259769911" duration="126000" />
+      <workItem from="1778259958919" duration="371000" />
+      <workItem from="1778260361720" duration="160000" />
+      <workItem from="1778317760479" duration="303000" />
+      <workItem from="1779002960125" duration="2297000" />
+      <workItem from="1779029907535" duration="847000" />
+      <workItem from="1779031303386" duration="1425000" />
+      <workItem from="1779095305696" duration="409000" />
     </task>
     <servers />
   </component>
@@ -170,6 +196,7 @@
   <component name="UnknownFeatures">
     <option featureType="dependencySupport" implementationName="javascript:npm:react" />
     <option featureType="dependencySupport" implementationName="executable:docker" />
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.env" />
     <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
     <option featureType="dependencySupport" implementationName="executable:kubectl" />
   </component>

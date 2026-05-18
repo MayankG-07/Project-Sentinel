@@ -13,7 +13,7 @@ services:
       # Shared volume for rendered page images
       - ./client/public/rendered_pages:/app/client/public/rendered_pages
     env_file:
-      - .env
+      - sentinel.env
     command: uvicorn server:app --host 0.0.0.0 --port 8000
     extra_hosts:
       - "host.docker.internal:host-gateway"

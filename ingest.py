@@ -1,9 +1,15 @@
 import os
+import sys
+from dotenv import load_dotenv
+
+# --- CHROMA_DB COMPATIBILITY FIX ---
+# We use a custom filename 'sentinel.env' to prevent ChromaDB from auto-scanning it.
+load_dotenv("sentinel.env")
+
 import logging
 import shutil
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
-from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -11,15 +17,14 @@ from langchain_core.documents import Document
 import fitz  # PyMuPDF
 
 # --- CONFIG & LOGGING ---
-load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-DATA_PATH = os.getenv("DATA_PATH", "Data")
-DB_PATH = os.getenv("DB_PATH", "chroma_db")
-EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
-CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 1000))
-CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 200))
+DATA_PATH = os.getenv("SENTINEL_DATA_PATH", "Data")
+DB_PATH = os.getenv("SENTINEL_DB_PATH", "chroma_db")
+EMBEDDING_MODEL_NAME = os.getenv("SENTINEL_EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
+CHUNK_SIZE = int(os.getenv("SENTINEL_CHUNK_SIZE", 1000))
+CHUNK_OVERLAP = int(os.getenv("SENTINEL_CHUNK_OVERLAP", 200))
 
 def load_pdf_with_pymupdf(file_path: str):
     """Loads a PDF using PyMuPDF for high-quality text extraction."""

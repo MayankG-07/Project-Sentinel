@@ -1,4 +1,11 @@
 import os
+import sys
+from dotenv import load_dotenv
+
+# --- CHROMA_DB COMPATIBILITY FIX ---
+# We use a custom filename 'sentinel.env' to prevent ChromaDB from auto-scanning it.
+load_dotenv("sentinel.env")
+
 import re
 import sqlite3
 import logging
@@ -17,7 +24,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.utilities import SQLDatabase
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
-from dotenv import load_dotenv
 from auth import get_current_user
 import sqlparse
 import fitz  # PyMuPDF
@@ -26,7 +32,6 @@ from fpdf import FPDF
 # --- LOGGING & CONFIG ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-load_dotenv()
 
 AUDIT_LOG_FILE = "forensic_audit.log"
 
@@ -45,11 +50,11 @@ def log_forensic_audit(user_data: dict, query: str, sources: list, status: str =
             f.write(json.dumps(audit_entry) + "\n")
     except: pass
 
-DB_PATH = os.getenv("DB_PATH", "chroma_db")
-MODEL_NAME = os.getenv("MODEL_NAME", "llama3")
-EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
-OUTPUT_DIR = "/app/client/public/rendered_pages"
+DB_PATH = os.getenv("SENTINEL_DB_PATH", "chroma_db")
+MODEL_NAME = os.getenv("SENTINEL_MODEL_NAME", "llama3")
+EMBEDDING_MODEL_NAME = os.getenv("SENTINEL_EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
+OLLAMA_HOST = os.getenv("SENTINEL_OLLAMA_HOST", "http://host.docker.internal:11434")
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'client', 'public', 'rendered_pages') # Modified for local execution
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # --- INITIALIZE SERVICES ---
@@ -89,54 +94,47 @@ def render_pdf_page(doc_path: str, page_num: int) -> str:
     except: return ""
 
 def run_secure_sql(query_text: str, db: SQLDatabase, llm: OllamaLLM):
+    if not db: return None
     try:
         schema = db.get_table_info()
-        prompt = f"""
-        You are a SQL expert. Write a standard SQL SELECT query to answer this question: {query_text}
-        
-        DATABASE SCHEMA:
-        {schema}
-        
-        RULES:
-        1. Return ONLY the SQL code. No explanation.
-        2. Use JOINs to link tables.
-        3. Start with 'SELECT'.
-        """
-        # Use the non-streaming LLM for logic
+        prompt = f"You are a SQL expert. Write a standard SQL SELECT query for: {query_text}\nSchema: {schema}\nReturn ONLY SQL."
         raw_response = llm.invoke(prompt).strip()
-        
-        # Robust SQL Extraction
         sql_match = re.search(r'(SELECT.*)', raw_response, re.IGNORECASE | re.DOTALL)
-        if not sql_match:
-            logger.warning(f"SQL Generation Failed. Raw response: {raw_response}")
-            return None
-            
-        generated_sql = sql_match.group(1).split(';')[0] + ';'
-        logger.info(f"Executing SQL: {generated_sql}")
-        
+        generated_sql = sql_match.group(1).split(';')[0] + ';' if sql_match else ""
+        if not generated_sql or "SELECT" not in generated_sql.upper(): return None
         result = db.run(generated_sql)
         return {"sql": generated_sql, "data": result}
     except Exception as e:
-        logger.error(f"SQL Engine Error: {e}")
+        logger.error(f"SQL Execution Error: {e}")
         return None
 
 # --- INITIALIZE ENGINES ---
-# Logic LLM (Non-Streaming) for SQL and reasoning
 logic_llm = OllamaLLM(base_url=OLLAMA_HOST, model=MODEL_NAME, temperature=0, streaming=False)
-# Stream LLM (Streaming) for the final response
 stream_llm = OllamaLLM(base_url=OLLAMA_HOST, model=MODEL_NAME, temperature=0, streaming=True)
-
 embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
 vector_db = Chroma(persist_directory=DB_PATH, embedding_function=embeddings)
 retriever = vector_db.as_retriever(search_kwargs={"k": 5})
 
-# Database Connection with Logging
-db_uri = os.getenv("SQL_CONNECTION_STRING")
+# --- FAILSAFE DATABASE CONNECTION ---
+sql_db = None
+db_uri = os.getenv("SENTINEL_SQL_CONNECTION_STRING")
+db_source_name = "Local Offline Database"
+
 if db_uri:
-    logger.info("Initializing connection to LIVE SQL Database...")
-    sql_db = SQLDatabase.from_uri(db_uri)
+    try:
+        logger.info("Attempting to connect to LIVE SQL Database...")
+        # Force SSL for Supabase
+        if "sslmode" not in db_uri:
+            db_uri += ("&" if "?" in db_uri else "?") + "sslmode=require"
+        sql_db = SQLDatabase.from_uri(db_uri)
+        db_source_name = "Live Online Database (Supabase)"
+        logger.info("Connected to Live Database successfully.")
+    except Exception as e:
+        logger.error(f"CRITICAL: Live Database connection failed: {e}")
+        logger.warning("Falling back to local SQLite database to prevent crash.")
+        sql_db = SQLDatabase.from_uri("sqlite:///db_data/company.db")
 else:
-    logger.warning("No SQL_CONNECTION_STRING found. Using local SQLite.")
+    logger.info("No SENTINEL_SQL_CONNECTION_STRING found. Using local SQLite.")
     sql_db = SQLDatabase.from_uri("sqlite:///db_data/company.db")
 
 # --- ENDPOINTS ---
@@ -165,12 +163,12 @@ async def chat(request: QueryRequest, background_tasks: BackgroundTasks, current
                     log_forensic_audit(current_user, request.text, sources, "SUCCESS")
                     return
 
-        # 2. DATA GATHERING (Using Logic LLM)
+        # 2. DATA GATHERING
         sql_res = run_secure_sql(safe_query, sql_db, logic_llm)
         db_clean = clean_db_result(sql_res["data"]) if sql_res else None
         
         if db_clean:
-            sources.append({"source": "Live Online Database (Supabase)", "content": f"SQL: {sql_res['sql']}\nResult: {db_clean}"})
+            sources.append({"source": db_source_name, "content": f"SQL: {sql_res['sql']}\nResult: {db_clean}"})
         else:
             sources.append({"source": "SQL Engine", "content": "No relevant data found in database."})
 
@@ -179,7 +177,7 @@ async def chat(request: QueryRequest, background_tasks: BackgroundTasks, current
         for doc in docs:
             sources.append({"source": os.path.basename(doc.metadata.get('source', 'Unknown')), "content": doc.page_content})
 
-        # 3. AUTHORITATIVE SYNTHESIS (Using Stream LLM)
+        # 3. AUTHORITATIVE SYNTHESIS
         synthesis_prompt = f"""
         You are Project Sentinel, a professional AI agent. You have DIRECT ACCESS to internal data.
         

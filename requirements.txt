@@ -12,9 +12,9 @@ sqlparse
 langchain-experimental
 presidio-analyzer
 presidio-anonymizer
-sentence-transformers
+sentence-transformers>=2.2.2
+huggingface-hub
 chromadb
-pypdf
 langchain-ollama
 langchain-huggingface
 langchain-chroma

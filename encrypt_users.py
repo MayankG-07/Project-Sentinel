@@ -3,13 +3,13 @@ import json
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from sentinel.env file
 load_dotenv()
 
 # Get the encryption key from the environment
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 if not ENCRYPTION_KEY:
-    raise ValueError("ENCRYPTION_KEY not found in .env file. Please run generate_key.py and add it.")
+    raise ValueError("ENCRYPTION_KEY not found in sentinel.env file. Please run generate_key.py and add it.")
 
 # Initialize Fernet with the key
 fernet = Fernet(ENCRYPTION_KEY.encode())
