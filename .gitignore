@@ -3,7 +3,7 @@
 # =========================================
 
 # --- Secrets & Legal ---
-sentinel.env
+backend/sentinel.env
 # Note: LICENSE is NOT ignored so it is visible on GitHub
 
 # --- Python ---
@@ -19,11 +19,12 @@ __pycache__/
 htmlcov/
 
 # --- Databases & Generated Data ---
-chroma_db/
-db_data/
+backend/data/*
+backend/data/chroma_db/
+backend/data/db_data/
 # CRITICAL: Ignore all audit logs
 audit.log
-forensic_audit.log
+backend/data/forensic_audit.log
 *.log
 
 # --- Temporary Assets ---

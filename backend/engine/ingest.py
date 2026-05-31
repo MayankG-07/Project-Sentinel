@@ -1,11 +1,7 @@
+from pathlib import Path
 import os
 import sys
 from dotenv import load_dotenv
-
-# --- CHROMA_DB COMPATIBILITY FIX ---
-# We use a custom filename 'sentinel.env' to prevent ChromaDB from auto-scanning it.
-load_dotenv("sentinel.env")
-
 import logging
 import shutil
 from multiprocessing import Pool, cpu_count
@@ -16,12 +12,22 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import fitz  # PyMuPDF
 
+# --- DYNAMIC PATH CONFIGURATION ---
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# Correctly define DATA_DIR relative to BASE_DIR for ingestion source
+DATA_DIR_INGEST = BASE_DIR / "backend" / "data" / "Data"
+DB_DIR = BASE_DIR / "backend" / "data" / "chroma_db"
+
+# Load environment variables from .env file in the project root
+load_dotenv(BASE_DIR / ".env")
+
 # --- CONFIG & LOGGING ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-DATA_PATH = os.getenv("SENTINEL_DATA_PATH", "Data")
-DB_PATH = os.getenv("SENTINEL_DB_PATH", "chroma_db")
+# Use the dynamic paths, allowing override from .env
+DATA_PATH = os.getenv("SENTINEL_DATA_PATH", str(DATA_DIR_INGEST))
+DB_PATH = os.getenv("SENTINEL_DB_PATH", str(DB_DIR))
 EMBEDDING_MODEL_NAME = os.getenv("SENTINEL_EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
 CHUNK_SIZE = int(os.getenv("SENTINEL_CHUNK_SIZE", 1000))
 CHUNK_OVERLAP = int(os.getenv("SENTINEL_CHUNK_OVERLAP", 200))
@@ -51,19 +57,23 @@ def load_pdf_with_pymupdf(file_path: str):
 def process_documents(file_paths):
     """Loads and splits a list of documents in parallel."""
     pdf_files = [p for p in file_paths if p.lower().endswith(".pdf")]
-    
+
     with Pool(processes=min(cpu_count(), len(pdf_files))) as pool:
         all_docs = []
         with tqdm(total=len(pdf_files), desc="Loading Documents") as pbar:
             for docs in pool.imap_unordered(load_pdf_with_pymupdf, pdf_files):
                 all_docs.extend(docs)
                 pbar.update()
-    
+
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     chunks = text_splitter.split_documents(all_docs)
     return chunks
 
-def ingest_data():
+def process_and_ingest(clearance_level: str):
+    """
+    Main ingestion function to process documents and add them to the vector store
+    with a specified clearance level.
+    """
     logger.info(f"--- Scanning {DATA_PATH} for documents ---")
     if not os.path.exists(DATA_PATH):
         os.makedirs(DATA_PATH)
@@ -76,17 +86,21 @@ def ingest_data():
         return
 
     logger.info(f"Found {len(all_files)} file(s) to process.")
-    
+
     chunks = process_documents(all_files)
     if not chunks:
         logger.error("No content could be extracted from the documents.")
         return
 
+    # Inject clearance_level metadata into each chunk
+    for chunk in chunks:
+        chunk.metadata["clearance_level"] = clearance_level
+    logger.info(f"Injected clearance_level '{clearance_level}' into {len(chunks)} document chunks.")
+
     logger.info(f"\n--- Vectorizing {len(chunks)} document chunks ---")
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
-    
+
     # Ensure the directory is clean before ingestion
-    # Note: This may fail if the directory is locked by another process
     if os.path.exists(DB_PATH):
         try:
             shutil.rmtree(DB_PATH)
@@ -102,4 +116,7 @@ def ingest_data():
     logger.info("--- Ingestion Complete. AI Memory has been successfully updated. ---")
 
 if __name__ == "__main__":
-    ingest_data()
+    # Example usage: Ingest documents with a default clearance level
+    # In a real scenario, this might come from CLI arguments or another configuration.
+    default_clearance = os.getenv("DEFAULT_INGEST_CLEARANCE", "confidential")
+    process_and_ingest(clearance_level=default_clearance)

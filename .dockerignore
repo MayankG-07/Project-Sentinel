@@ -4,7 +4,7 @@
 
 # Docker
 .dockerignore
-Dockerfile.backend
+backend/Dockerfile.backend
 Dockerfile.frontend
 docker-compose.yml
 
@@ -21,6 +21,6 @@ client/node_modules/
 .idea/
 
 # Data & DBs - These are mounted as volumes, not copied
-chroma_db/
-company.db
-Data/
+backend/data/chroma_db/
+backend/data/company.db
+backend/data/Data/

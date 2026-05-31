@@ -1,1 +1,82 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles for the dark, futuristic theme */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars on main body */
+  background-color: var(--background); /* Ensure background color is applied */
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif; /* Fallback */
+}
+
+/* Define CSS variables for colors for potential shadcn/ui integration or direct use */
+:root {
+  --background: #020617;
+  --background-secondary: #0B1120;
+  --surface: #111827;
+  --card-background: rgba(17,24,39,0.72);
+  --primary-accent: #38BDF8;
+  --secondary-accent: #0EA5E9;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border: rgba(255,255,255,0.08);
+
+  /* Shadcn/ui variables - map to your custom palette */
+  --primary: var(--primary-accent);
+  --primary-foreground: var(--background); /* Or a contrasting color */
+  --secondary: var(--background-secondary);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--secondary-accent);
+  --accent-foreground: var(--text-primary);
+  --popover: var(--card-background);
+  --popover-foreground: var(--text-primary);
+  --card: var(--card-background);
+  --card-foreground: var(--text-primary);
+  --border-color: var(--border);
+  --input: var(--border);
+  --ring: var(--primary-accent);
+  --radius: 0.5rem; /* Default border radius for shadcn components */
+}
+
+/* Custom scrollbar for a sleek look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface);
+  border-radius: 10px;
+  border: 2px solid var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Global glassmorphism effect for elements that need it */
+.glassmorphism {
+  background-color: var(--card-background);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); /* For Safari */
+  border: 1px solid var(--border);
+  box-shadow: var(--md-glass);
+}
+
+/* Font imports (if not using local files or Google Fonts) */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); */
+/* For Geist/Satoshi, you'd typically self-host or use specific font services */

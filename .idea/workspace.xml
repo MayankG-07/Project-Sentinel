@@ -5,37 +5,126 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6292032-0828-4792-a6fd-1785ae2b0047" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/sentinel.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/Dockerfile.backend" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/api/schemas.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/api/server.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/auth.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/database.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/encrypt_users.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/generate_hash.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/generate_key.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/logger.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/core/security.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/data/users.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/Data/bot.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/Data/code.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/chroma_db/89104f86-0a3d-47b0-8ba0-4e60839c5294/data_level0.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/chroma_db/89104f86-0a3d-47b0-8ba0-4e60839c5294/header.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/chroma_db/89104f86-0a3d-47b0-8ba0-4e60839c5294/length.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/chroma_db/89104f86-0a3d-47b0-8ba0-4e60839c5294/link_lists.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/chroma_db/chroma.sqlite3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/ingest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/engine/router.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/components.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/chat/AIMessageCard.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/layout/ContextPanel.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/layout/Header.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/layout/MainLayout.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/layout/Sidebar.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/ui/accordion.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/ui/button.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/ui/checkbox.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/ui/input.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/components/ui/label.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/context/ThemeProvider.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/lib/utils.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/AuthPage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/ChatWorkspacePage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/DashboardPage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/KnowledgeBasePage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/LogsAuditPage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/SettingsPage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/UserManagementPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dockerignore" beforeDir="false" afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data/bot.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data/code.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile.backend" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/vite.config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/encrypt_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/encrypt_users.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/generate_key.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_key.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingest.py" beforeDir="false" afterPath="$PROJECT_DIR$/ingest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/encrypt_users.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/generate_hash.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/generate_key.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sentinel.env" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/users.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CopilotChats">
+    <option name="panelChat">
+      <chat>
+        <option name="activeSessionId" value="74c3a7cd-0f48-474e-8efd-2468e177e5b2" />
+        <option name="sessions">
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="74c3a7cd-0f48-474e-8efd-2468e177e5b2" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="gemini-3.1-pro-preview" />
+            <option name="status" value="Completed" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="b7c9adef-c6ef-467c-88a2-f9c98cd614a3" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="gpt-5-mini" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+        </option>
+        <option name="type" value="PANEL" />
+      </chat>
+    </option>
+  </component>
   <component name="CopilotPersistence">
     <persistenceIdMap>
+      <entry key="_D:/Project-Sentinel" value="3DuIhqERIEmMuNPMd8AHxrdWMnr" />
       <entry key="_E:/Project-Sentinel" value="38Ydm73zIWglB5M4y2tWYTi0uC0" />
     </persistenceIdMap>
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
-      <entry key="edit-panel" value="GPT-5 mini" />
-      <entry key="chat-panel" value="GPT-5 mini" />
-      <entry key="agent-panel" value="GPT-5 mini" />
+      <entry key="agent-panel" value="Gemini 3.1 Pro" />
+      <entry key="chat-panel" value="Gemini 3.1 Pro" />
     </selectedModels>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="1716" />
+    <option name="cachedIndexableFilesCount" value="69" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -47,6 +136,65 @@
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.1682277519968973" />
+      <entry key="MS500" value="2.2064922068308617" />
+      <entry key="S2" value="2.7919001677406126" />
+      <entry key="S5" value="3.1492953795122074" />
+      <entry key="S10" value="3.506325914175027" />
+      <entry key="S30" value="4.396325932395047" />
+      <entry key="S60" value="4.996165239288609" />
+      <entry key="M2" value="5.4335951215900815" />
+      <entry key="M5" value="5.9482294150296084" />
+      <entry key="M10" value="7.143018480213407" />
+      <entry key="M15" value="8.335921959300466" />
+      <entry key="M30" value="10.609804023920722" />
+      <entry key="H1" value="12.44469647794648" />
+      <entry key="H2" value="13.616494500181084" />
+      <entry key="H4" value="14.279502501200602" />
+      <entry key="D1" value="14.875714924882512" />
+      <entry key="W1" value="14.982139226578667" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="3.242903599961031E-149" />
+      <entry key="MS500" value="2.0053344179805217E-30" />
+      <entry key="S2" value="3.763108167487624E-8" />
+      <entry key="S5" value="0.0010720589843892202" />
+      <entry key="S10" value="0.032742311836356626" />
+      <entry key="S30" value="0.3199163578149978" />
+      <entry key="S60" value="0.5656114901723601" />
+      <entry key="M2" value="0.7520714661336114" />
+      <entry key="M5" value="0.8922851077780468" />
+      <entry key="M10" value="0.9446084415132265" />
+      <entry key="M15" value="0.9627227060852174" />
+      <entry key="M30" value="0.9811843384834561" />
+      <entry key="H1" value="0.9905474943098166" />
+      <entry key="H2" value="0.9952625253217444" />
+      <entry key="H4" value="0.9976284505374456" />
+      <entry key="D1" value="0.9996043506165408" />
+      <entry key="W1" value="0.9999434690731722" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.1359144039712754" />
+      <entry key="MS500" value="2.1935199641706533" />
+      <entry key="S2" value="2.7875769741891623" />
+      <entry key="S5" value="3.147849621220712" />
+      <entry key="S10" value="3.53547321544015" />
+      <entry key="S30" value="4.708752287451156" />
+      <entry key="S60" value="5.55534881460884" />
+      <entry key="M2" value="6.181432874811856" />
+      <entry key="M5" value="6.838494226813204" />
+      <entry key="M10" value="8.086493017365758" />
+      <entry key="M15" value="9.297825579206814" />
+      <entry key="M30" value="11.59052253820204" />
+      <entry key="H1" value="13.434988934398856" />
+      <entry key="H2" value="14.611622498255441" />
+      <entry key="H4" value="15.277061711501917" />
+      <entry key="D1" value="15.875307439685077" />
+      <entry key="W1" value="15.982080997284772" />
+    </decayedShown>
   </component>
   <component name="PackageJsonUpdateNotifier">
     <dismissed value="$PROJECT_DIR$/client/package.json" />
@@ -60,6 +208,20 @@
   <component name="ProjectId" id="38Ydm73zIWglB5M4y2tWYTi0uC0" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="gemini-3.1-pro-preview" />
+          </model>
+        </option>
+        <option name="targetType" value="LOCAL" />
+      </template>
+    </option>
   </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -82,7 +244,7 @@
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Project-Sentinel&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Project-Sentinel/backend/engine/Data&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -98,14 +260,23 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Project-Sentinel\backend\engine\Data" />
+      <recent name="D:\Project-Sentinel\backend\data" />
       <recent name="E:\ProjectSentinel\Data" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Project-Sentinel\backend\data" />
+      <recent name="D:\Project-Sentinel\backend\core" />
+      <recent name="D:\Project-Sentinel\backend" />
+      <recent name="D:\Project-Sentinel\backend\api" />
+      <recent name="D:\Project-Sentinel\backend\engine" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.31033.145" />
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.24374.151" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.24374.151" />
       </set>
     </attachedChunks>
   </component>
@@ -186,7 +357,11 @@
       <workItem from="1779002960125" duration="2297000" />
       <workItem from="1779029907535" duration="847000" />
       <workItem from="1779031303386" duration="1425000" />
-      <workItem from="1779095305696" duration="409000" />
+      <workItem from="1779095305696" duration="9619000" />
+      <workItem from="1779123019241" duration="2550000" />
+      <workItem from="1779125654968" duration="817000" />
+      <workItem from="1779186482087" duration="783000" />
+      <workItem from="1780248264388" duration="7417000" />
     </task>
     <servers />
   </component>
@@ -198,6 +373,7 @@
     <option featureType="dependencySupport" implementationName="executable:docker" />
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.env" />
     <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
+    <option featureType="com.intellij.fileTypeFactory" implementationName="components.json" />
     <option featureType="dependencySupport" implementationName="executable:kubectl" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

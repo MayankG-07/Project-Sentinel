@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: backend/Dockerfile.backend
     container_name: sentinel-backend
     ports:
       - "8000:8000"
@@ -13,7 +13,7 @@ services:
       # Shared volume for rendered page images
       - ./client/public/rendered_pages:/app/client/public/rendered_pages
     env_file:
-      - sentinel.env
+      - backend/sentinel.env
     command: uvicorn server:app --host 0.0.0.0 --port 8000
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -38,3 +38,4 @@ services:
 networks:
   default:
     name: sentinel-network
+

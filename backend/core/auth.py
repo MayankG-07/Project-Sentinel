@@ -1,7 +1,12 @@
+from pathlib import Path
 import os
 from fastapi import Security, HTTPException, status
 from fastapi.security import APIKeyHeader
 from passlib.context import CryptContext
+
+# --- DYNAMIC PATH CONFIGURATION ---
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+DATA_DIR = BASE_DIR / "backend" / "data"
 
 # --- CONFIGURATION ---
 # In a real application, this would come from a secure database.
@@ -11,14 +16,17 @@ FAKE_USERS_DB = {
     "admin": {
         "hashed_key": "$2b$12$HDgiFJQiPQ86AcphdnVVq.y9xwMsGGWcuLbddUO8X0gUlZkspC/tC", # admin_key
         "roles": ["admin", "finance", "legal"],
+        "clearance_level": "top_secret", # Added clearance level
     },
     "alice": {
         "hashed_key": "$2b$12$k7pTMFCC0tizMDa52rYwfuefnaqRTi5MG.8WgrArjeC38SecOlD5e", # finance_key
         "roles": ["finance"],
+        "clearance_level": "confidential", # Added clearance level
     },
     "bob": {
         "hashed_key": "$2b$12$mZnvlSzEdQ1a7kUqQHoedeGceYyFFZqgqNLuK7iTces1ckq55g/oS", # legal_key
         "roles": ["legal"],
+        "clearance_level": "restricted", # Added clearance level
     }
 }
 
@@ -32,6 +40,7 @@ def get_user(api_key: str):
     for username, user_data in FAKE_USERS_DB.items():
         try:
             if pwd_context.verify(api_key, user_data["hashed_key"]):
+                # Return a copy to prevent direct modification of FAKE_USERS_DB
                 return {"username": username, **user_data}
         except Exception:
             # This will catch errors from malformed hashes and allow the loop to continue.
